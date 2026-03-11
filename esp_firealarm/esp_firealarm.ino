@@ -1,14 +1,15 @@
-#define BLYNK_TEMPLATE_ID   "TMPLxxxxxx"
-#define BLYNK_TEMPLATE_NAME "FireSystem"
-#define BLYNK_AUTH_TOKEN    "YourAuthTokenHere"
+#define BLYNK_TEMPLATE_ID TEMPLATE_ID
+#define BLYNK_TEMPLATE_NAME TEMPLATE_NAME
+#define BLYNK_AUTH_TOKEN AUTH_TOKEN
 
+#include "config.h"
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 #include <SoftwareSerial.h>
 
-char auth[] = "YourAuthToken";
-char ssid[] = "YourWiFi";
-char pass[] = "YourPass";
+char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = WIFI_SSID;
+char pass[] = WIFI_PASS;
 
 SoftwareSerial swSer(5, 4); // D1, D2
 
@@ -27,15 +28,13 @@ void loop() {
     if (data == "ALARM_ON") {
       Blynk.logEvent("fire_alert", "Emergency! Fire detected!");
       Blynk.virtualWrite(V1, 255); // Red LED Widget
-    } 
-    else if (data == "ALARM_OFF") {
+    } else if (data == "ALARM_OFF") {
       Blynk.virtualWrite(V1, 0);
-    } 
-    else {
+    } else {
       // Parse sensor values: "smoke,temp,flame"
       int firstComma = data.indexOf(',');
       int secondComma = data.indexOf(',', firstComma + 1);
-      
+
       if (firstComma > 0 && secondComma > 0) {
         String s = data.substring(0, firstComma);
         String t = data.substring(firstComma + 1, secondComma);
