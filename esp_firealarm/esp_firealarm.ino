@@ -14,47 +14,53 @@ char pass[] = WIFI_PASS;
 
 BlynkTimer timer;
 
+int currentAlarm = 0;
+
 void setup() {
   Serial.begin(9600); // For debugging
   Wire.begin(D1, D2); // SDA = D1 (GPIO4), SCL = D2 (GPIO5)
   Blynk.begin(auth, ssid, pass);
-  timer.setInterval(1000L, requestData); // Poll every 500ms
+  timer.setInterval(1000L, requestData); // Poll every 1000ms
 }
 
 void loop() {
   Blynk.run();
   timer.run();
-  delay(500);
 }
 
 void requestData() {
-  Wire.requestFrom(8, 5);
+  Wire.requestFrom(8, 10);
   
-  if (Wire.available() >= 5) {
+  if (Wire.available() >= 10) {
     int smoke = (Wire.read() << 8) | Wire.read();
     int temp = (Wire.read() << 8) | Wire.read();
+    int flame1 = (Wire.read() << 8) | Wire.read();
+    int flame2 = (Wire.read() << 8) | Wire.read();
     int flame = Wire.read();
+    int alarmTriggered = Wire.read();
 
     Serial.print(smoke); Serial.print(",");
-    Serial.print(temp*500/1023); Serial.print(",");
+    Serial.print(temp); Serial.print(",");
+    Serial.print(flame1); Serial.print(",");
+    Serial.print(flame2); Serial.print(",");
     Serial.println(flame);
+    Serial.println(alarmTriggered);
 
     // Update Blynk Gauges
     Blynk.virtualWrite(V2, smoke);
-    Blynk.virtualWrite(V3, temp*500/1023);
+    Blynk.virtualWrite(V3, temp);
     Blynk.virtualWrite(V4, flame);
+    Blynk.virtualWrite(V5, flame1);
+    Blynk.virtualWrite(V6, flame2);
+    Blynk.virtualWrite(V1, alarmTriggered);
 
     // Alarm Logic for Blynk Notifications
-    static bool alarmTriggered = false;
-    int activeCount = (flame == 1 ? 1 : 0) + (smoke > 550 ? 1 : 0) + (temp*500/1023 > 60 ? 1 : 0);
-
-    if (activeCount >= 2 && !alarmTriggered) {
+    if (alarmTriggered == 1 && currentAlarm != alarmTriggered) {
       Blynk.logEvent("fire_alert", "Alert: Fire Detected!");
-      Blynk.virtualWrite(V1, 255);
-      alarmTriggered = true;
-    } else if (activeCount < 2 && alarmTriggered) {
-      Blynk.virtualWrite(V1, 0);
-      alarmTriggered = false;
+    } else if (alarmTriggered != 1 && currentAlarm != alarmTriggered) {
+      Blynk.logEvent("fire_off", "Fire has been put out!");
     }
+    
+    currentAlarm = alarmTriggered;
   }
 }
