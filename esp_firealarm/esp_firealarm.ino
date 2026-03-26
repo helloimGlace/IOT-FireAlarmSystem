@@ -6,7 +6,6 @@
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 #include <Wire.h>
-// #include <SoftwareSerial.h>
 
 char auth[] = BLYNK_AUTH_TOKEN;
 char ssid[] = WIFI_SSID;
@@ -31,7 +30,9 @@ void loop() {
 void requestData() {
   Wire.requestFrom(8, 10);
   
+  // Receive information from Arduino
   if (Wire.available() >= 10) {
+    // Read & parse info received
     int smoke = (Wire.read() << 8) | Wire.read();
     int temp = (Wire.read() << 8) | Wire.read();
     int flame1 = (Wire.read() << 8) | Wire.read();
@@ -39,6 +40,12 @@ void requestData() {
     int flame = Wire.read();
     int alarmTriggered = Wire.read();
 
+    // Convert analog inputs to percentage
+    smoke = smoke*100/1023;
+    flame1 = 100-flame1*100/1023;
+    flame2 = 100-flame2*100/1023;
+
+    // Serial print for debug
     Serial.print(smoke); Serial.print(",");
     Serial.print(temp); Serial.print(",");
     Serial.print(flame1); Serial.print(",");
