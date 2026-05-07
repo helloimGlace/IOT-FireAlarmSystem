@@ -21,7 +21,7 @@ int step = 1;
 int smokeVal, tempVal, flameVal1, flameVal2;
 bool flameDetected;
 bool alarmTriggered = false;
-
+  
 void setup() {
   Serial.begin(9600);
   Wire.begin(8); 
