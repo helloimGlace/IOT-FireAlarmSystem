@@ -22,6 +22,7 @@ void setup() {
   timer.setInterval(1000L, requestData); // Poll every 1000ms
 }
 
+// day la 1 dong test
 void loop() {
   Blynk.run();
   timer.run();
@@ -53,7 +54,6 @@ void requestData() {
     Serial.println(flame);
     Serial.println(alarmTriggered);
 
-    // Update Blynk Gauges
     Blynk.virtualWrite(V2, smoke);
     Blynk.virtualWrite(V3, temp);
     Blynk.virtualWrite(V4, flame);
